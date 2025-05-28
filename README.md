@@ -28,7 +28,7 @@ This tool scans your local network, identifies connected devices (brand, type, e
 ## Installation
 1. Clone this repository:
    ```sh
-   git clone https://github.com/yourusername/automated-network-visualizer.git
+   git clone https://github.com/ophanim1/automated-network-visualizer
    cd automated-network-visualizer
    ```
 
