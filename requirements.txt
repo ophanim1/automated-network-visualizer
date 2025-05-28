@@ -1,0 +1,6 @@
+flask
+scapy
+python-nmap
+netaddr
+requests
+jinja2 
