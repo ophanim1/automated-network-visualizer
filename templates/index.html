@@ -106,13 +106,56 @@
         .scanning-overlay .message {
             color: #333;
             text-align: center;
+            margin-bottom: 20px;
+        }
+        .progress-container {
+            width: 80%;
+            max-width: 500px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .progress-details {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        .stage-progress {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div id="scanningOverlay" class="scanning-overlay" style="display: none;">
         <div class="loading">⏳</div>
-        <div class="message">Performing initial network scan...</div>
+        <div class="message">Scanning network...</div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="progressDetails" class="progress-details">
+                Initializing...
+            </div>
+            <div id="stageProgress" class="stage-progress">
+                Stage progress: 0/100
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -147,15 +190,32 @@
                 if (data.is_scanning) {
                     scanningOverlay.style.display = 'flex';
                     rescanBtn.disabled = true;
+                    
+                    // Update progress information
+                    const progress = data.progress;
+                    const progressFill = document.getElementById('progressFill');
+                    const progressDetails = document.getElementById('progressDetails');
+                    const stageProgress = document.getElementById('stageProgress');
+                    
+                    // Update overall progress
+                    const overallProgress = Math.round((progress.progress / progress.total_stages) * 100);
+                    progressFill.style.width = `${overallProgress}%`;
+                    
+                    // Update progress details
+                    progressDetails.textContent = `${progress.current_stage} (${overallProgress}%)`;
+                    
+                    // Update stage progress
+                    if (progress.stage_total > 0) {
+                        const stagePercentage = Math.round((progress.stage_progress / progress.stage_total) * 100);
+                        stageProgress.textContent = `Stage progress: ${progress.stage_progress}/${progress.stage_total} (${stagePercentage}%)`;
+                    }
                 } else {
                     scanningOverlay.style.display = 'none';
                     rescanBtn.disabled = false;
-                    // Stop the refresh interval once scanning is complete
                     if (refreshInterval) {
                         clearInterval(refreshInterval);
                         refreshInterval = null;
                     }
-                    // Update the network display
                     await updateNetwork();
                 }
             } catch (error) {

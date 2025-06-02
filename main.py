@@ -3,7 +3,7 @@ import json
 import threading
 import webbrowser
 from flask import Flask, render_template, jsonify, request, send_file
-from network_scanner import scan_network, generate_drawio_diagram
+from network_scanner import scan_network, generate_drawio_diagram, scan_progress
 
 app = Flask(__name__)
 
@@ -19,7 +19,6 @@ def index():
 @app.route('/api/scan')
 def api_scan():
     global scan_results, is_scanning
-    # Return a copy to avoid issues with the list being modified while accessed
     return jsonify({
         "devices": list(scan_results),
         "is_scanning": is_scanning
@@ -27,8 +26,12 @@ def api_scan():
 
 @app.route('/api/scan-status')
 def scan_status():
+    """Get the current scan status and progress"""
     global is_scanning
-    return jsonify({"is_scanning": is_scanning})
+    return jsonify({
+        "is_scanning": is_scanning,
+        "progress": scan_progress
+    })
 
 @app.route('/api/rescan', methods=['POST'])
 def rescan():
@@ -40,9 +43,13 @@ def rescan():
     is_scanning = True
     try:
         devices, diagram_file = scan_network()
-        scan_results = devices # Update scan_results with the list of devices
-        latest_diagram = diagram_file # Update latest_diagram with the file path
-        return jsonify({"status": "success", "devices": len(scan_results)})
+        scan_results = devices
+        latest_diagram = diagram_file
+        return jsonify({
+            "status": "success",
+            "devices": len(scan_results),
+            "diagram_file": diagram_file
+        })
     except Exception as e:
         print(f"Error during rescan: {e}")
         return jsonify({"status": "error", "message": f"Error during scan: {e}"})

@@ -3,4 +3,5 @@ scapy
 python-nmap
 netaddr
 requests
-jinja2 
+jinja2
+tqdm 
